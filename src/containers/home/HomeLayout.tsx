@@ -10,7 +10,7 @@ import {
   Box,
   Grid,
 } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import InterviewSettingsForm from "./InterviewSettingsForm";
 import JobDetailsForm from "./JobDetailsForm";
 import RequisitionForm from "./RequisitionDetailsForm";
@@ -25,13 +25,27 @@ const CustomTab: React.FC<TabProps> = ({ children, ...props }) => {
 };
 
 const HomeLayout = () => {
+  const [tabIndex, setTabIndex] = useState(0);
+
+  const handleTabsChange = (index: number) => {
+    setTabIndex(index);
+  };
+
+  const handleNext = () => {
+    setTabIndex((prevIndex) => Math.min(prevIndex + 1, 2));
+  };
+
+  const handlePrevious = () => {
+    setTabIndex((prevIndex) => Math.max(prevIndex - 1, 0));
+  };
+
   return (
     <Box w="100%">
       <Container maxW="1200px">
         <Heading fontFamily="Poppins" fontSize="1.5rem" my="2rem">
           Create Candidate Requisition
         </Heading>
-        <Tabs isLazy>
+        <Tabs index={tabIndex} isLazy>
           <TabList>
             <CustomTab>Requistion Details</CustomTab>
             <CustomTab>Job Details</CustomTab>
@@ -40,13 +54,13 @@ const HomeLayout = () => {
           <Grid display="grid" gridTemplateColumns="3fr 2fr" gap="24px">
             <TabPanels>
               <TabPanel>
-                <RequisitionForm />
+                <RequisitionForm handleNext={handleNext} handlePrevious={handlePrevious} />
               </TabPanel>
               <TabPanel>
-                <JobDetailsForm />
+              <JobDetailsForm handleNext={handleNext} handlePrevious={handlePrevious} />
               </TabPanel>
               <TabPanel>
-                <InterviewSettingsForm />
+              <InterviewSettingsForm handleNext={handleNext} handlePrevious={handlePrevious} />
               </TabPanel>
             </TabPanels>
             <DisplayCard />

@@ -1,6 +1,7 @@
 import { Button, Flex, Box } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { useFormik } from "formik";
+import * as Yup from "yup";
 
 import FormSelect from "../../components/formComponents/FormSelect";
 import { IInterViewSettings } from "../../interface/forms";
@@ -10,7 +11,15 @@ import {
   interviewModeOptions,
 } from "./constants";
 
-const InterviewDetailsForm: React.FC = () => {
+import { useData } from "./DataProvider";
+interface InterviewSettingsFormProps {
+  handleNext: () => void;
+  handlePrevious: () => void;
+}
+
+const InterviewSettingsForm: React.FC<InterviewSettingsFormProps> = ({ handleNext, handlePrevious }) => {
+  const { state, updateInterviewSettings } = useData()!;
+
   const {
     errors,
     touched,
@@ -18,18 +27,38 @@ const InterviewDetailsForm: React.FC = () => {
     values,
     setFieldTouched,
     setFieldValue,
+    isValid,
+    dirty,
   } = useFormik<IInterViewSettings>({
-    initialValues: {
-      interviewMode: "",
-      interviewDuration: "",
-      interviewLanguage: "",
-    },
+    initialValues: state.interviewSettings,
+    validationSchema: Yup.object().shape({
+      interviewMode: Yup.string().required("Interview mode is required"),
+      interviewDuration: Yup.string().required("Interview duration is required"),
+      interviewLanguage: Yup.string().required("Interview language is required"),
+    }),
     onSubmit: (values) => {
-      console.log({ values });
-      alert("Form successfully submitted");
+      if (isFormValid) {
+        updateInterviewSettings(values);
+        alert("Form successfully submitted");
+        // You can add any additional submission logic here
+      }
     },
   });
 
+  const isFormValid = useMemo(() => {
+    return (
+      values.interviewMode !== "" &&
+      values.interviewDuration !== "" &&
+      values.interviewLanguage !== "" &&
+      Object.keys(errors).length === 0
+    );
+  }, [values, errors]);
+
+  useEffect(() => {
+    // if (isFormValid) {
+      updateInterviewSettings(values);
+    // }
+  }, [values]);
   return (
     <Box width="100%" as="form" onSubmit={handleSubmit as any}>
       <Box width="100%">
@@ -56,7 +85,7 @@ const InterviewDetailsForm: React.FC = () => {
           touched={touched?.interviewDuration}
         />
         <FormSelect
-          label="Job Location"
+          label="Interview Language"
           name="interviewLanguage"
           placeholder="Select interview language"
           options={interviewLanguageOptions}
@@ -67,10 +96,10 @@ const InterviewDetailsForm: React.FC = () => {
           value={values.interviewLanguage}
         />
         <Flex w="100%" justify="flex-end" mt="4rem" gap="20px">
-          <Button colorScheme="gray" type="button">
+        <Button colorScheme="gray" type="button" onClick={handlePrevious}>
             Previous
           </Button>
-          <Button colorScheme="red" type="submit">
+          <Button colorScheme="red" type="submit" isDisabled={!isFormValid}>
             Submit
           </Button>
         </Flex>
@@ -79,4 +108,4 @@ const InterviewDetailsForm: React.FC = () => {
   );
 };
 
-export default InterviewDetailsForm;
+export default InterviewSettingsForm;

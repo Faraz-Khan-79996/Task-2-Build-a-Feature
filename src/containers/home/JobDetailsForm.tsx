@@ -1,30 +1,59 @@
 import { Button, Flex, Box } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
 import FormInput from "../../components/formComponents/FormInput";
 import { IJobDetails } from "../../interface/forms";
 
-const JobDetailsForm: React.FC = () => {
-  const { handleChange, errors, touched, handleBlur, handleSubmit, values } =
-    useFormik<IJobDetails>({
-      initialValues: {
-        jobTitle: "",
-        jobDetails: "",
-        jobLocation: "",
-      },
-      validationSchema: Yup.object().shape({
-        jobTitle: Yup.string().required("Job Title is required"),
-        jobDetails: Yup.string().required("Job Details is required"),
-        jobLocation: Yup.string().required("Job Location is required"),
-        jobPosition: Yup.string().required("Job position is required"),
-      }),
-      onSubmit: (values) => {
-        console.log({ values });
-        // Go to next step
-      },
-    });
+import { useData } from "./DataProvider";
+
+interface JobDetailsFormProps {
+  handleNext: () => void;
+  handlePrevious: () => void;
+}
+
+const JobDetailsForm: React.FC<JobDetailsFormProps> = ({ handleNext, handlePrevious }) => {
+  const { state, updateJobDetails } = useData()!;
+
+  const {
+    handleChange,
+    errors,
+    touched,
+    handleBlur,
+    handleSubmit,
+    values,
+    setFieldTouched,
+    setFieldValue,
+    isValid,
+    dirty,
+  } = useFormik<IJobDetails>({
+    initialValues: state.jobDetails,
+    validationSchema: Yup.object().shape({
+      jobTitle: Yup.string().required("Job Title is required"),
+      jobDetails: Yup.string().required("Job Details is required"),
+      jobLocation: Yup.string().required("Job Location is required"),
+    }),
+    onSubmit: (values) => {
+      if (isFormValid) {
+        updateJobDetails(values);
+        handleNext();
+      }
+    },
+  });
+
+  const isFormValid = useMemo(() => {
+    return (
+      values.jobTitle !== "" &&
+      values.jobDetails !== "" &&
+      values.jobLocation !== "" &&
+      Object.keys(errors).length === 0
+    );
+  }, [values, errors]);
+
+  useEffect(() => {
+      updateJobDetails(values);
+  }, [values]);
 
   return (
     <Box width="100%" as="form" onSubmit={handleSubmit as any}>
@@ -60,10 +89,10 @@ const JobDetailsForm: React.FC = () => {
           value={values.jobLocation}
         />
         <Flex w="100%" justify="flex-end" mt="4rem" gap="20px">
-          <Button colorScheme="gray" type="button">
+          <Button colorScheme="gray" type="button" onClick={handlePrevious}>
             Previous
           </Button>
-          <Button colorScheme="red" type="submit">
+          <Button colorScheme="red" type="submit" isDisabled={!isFormValid}>
             Next
           </Button>
         </Flex>

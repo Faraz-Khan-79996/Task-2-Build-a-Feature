@@ -1,5 +1,5 @@
 import { Button, Flex, Box } from "@chakra-ui/react";
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
@@ -8,7 +8,17 @@ import FormSelect from "../../components/formComponents/FormSelect";
 import { IRequisitionDetails } from "../../interface/forms";
 import { genderOptions, urgencyOptions } from "./constants";
 
-const RequisitionDetailsForm: React.FC = () => {
+import { useData } from "./DataProvider";
+
+interface RequisitionDetailsFormProps {
+  handleNext: () => void;
+  handlePrevious: () => void;
+}
+
+const RequisitionDetailsForm: React.FC<RequisitionDetailsFormProps> = ({ handleNext, handlePrevious }) => {
+
+  const { state, updateRequisitionDetails } = useData()!;
+
   const {
     handleChange,
     errors,
@@ -18,13 +28,10 @@ const RequisitionDetailsForm: React.FC = () => {
     values,
     setFieldTouched,
     setFieldValue,
+    isValid,
+    dirty,
   } = useFormik<IRequisitionDetails>({
-    initialValues: {
-      requisitionTitle: "",
-      noOfOpenings: 0,
-      urgency: "",
-      gender: "",
-    },
+    initialValues: state.requisitionDetails,
     validationSchema: Yup.object().shape({
       requisitionTitle: Yup.string().required("Requisition title is required"),
       noOfOpenings: Yup.number()
@@ -36,9 +43,30 @@ const RequisitionDetailsForm: React.FC = () => {
       gender: Yup.string().required("Gender is required"),
     }),
     onSubmit: (values) => {
-      //  Go to Next Step
+
+      if(isValid){
+        updateRequisitionDetails(values);
+        handleNext();
+      }
+
     },
   });
+
+  const isFormValid = useMemo(() => {
+    return (
+      values.requisitionTitle !== "" &&
+      values.noOfOpenings !== 0 &&
+      values.urgency !== "" &&
+      values.gender !== "" &&
+      Object.keys(errors).length === 0
+    );
+  }, [values, errors]);
+
+  useEffect(() => {
+    if (isFormValid) {
+      updateRequisitionDetails(values);
+    }  
+  }, [values]);
 
   return (
     <Box width="100%" as="form" onSubmit={handleSubmit as any}>
@@ -85,8 +113,11 @@ const RequisitionDetailsForm: React.FC = () => {
           touched={touched.urgency}
           value={values.urgency}
         />
-        <Flex w="100%" justify="flex-end" mt="4rem">
-          <Button colorScheme="red" type="submit">
+        <Flex w="100%" justify="flex-end" mt="4rem" gap="20px">
+          <Button colorScheme="gray" type="button" onClick={handlePrevious}>
+            Previous
+          </Button>
+          <Button colorScheme="red" type="submit" isDisabled={!isFormValid}>
             Next
           </Button>
         </Flex>
