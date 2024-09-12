@@ -63,9 +63,7 @@ const RequisitionDetailsForm: React.FC<RequisitionDetailsFormProps> = ({ handleN
   }, [values, errors]);
 
   useEffect(() => {
-    if (isFormValid) {
       updateRequisitionDetails(values);
-    }  
   }, [values]);
 
   return (
