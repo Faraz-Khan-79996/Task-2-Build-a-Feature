@@ -39,7 +39,7 @@ const InterviewSettingsForm: React.FC<InterviewSettingsFormProps> = ({ handleNex
     onSubmit: (values) => {
       if (isFormValid) {
         updateInterviewSettings(values);
-        alert("Form successfully submitted");
+        alert("Form successfully submitted\nIntern rakh lo plej 🥹");
         // You can add any additional submission logic here
       }
     },

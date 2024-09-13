@@ -1,6 +1,13 @@
 import { Box, Flex, Text, Grid } from "@chakra-ui/react";
 import React from "react";
 import { useData } from "./DataProvider";
+import {
+  interviewLanguageOptions,
+  interviewDurationOptions,
+  interviewModeOptions,
+  genderOptions,
+  urgencyOptions
+} from "./constants";
 
 const DataCard: React.FC<{ title: string; children: React.ReactNode }> = ({
   title,
@@ -40,6 +47,11 @@ const PreviewCard: React.FC = () => {
   if (!dataContext) return null; // Ensure context is available
 
   const { state } = dataContext;
+
+  const getLabel = (options: { label: string; value: string }[], value: string) => {
+    const option = options.find(opt => opt.value === value);
+    return option ? option.label : value;
+  };
 
   return (
     <Box p="1rem">
@@ -86,8 +98,14 @@ const PreviewCard: React.FC = () => {
         </Box>
         <Box maxH="50rem" overflowY="auto" px="24px" pb="24px">
           <DataCard title="Requisition Details">
-            <KeyValue title="Urgency" value={state.requisitionDetails.urgency} />
-            <KeyValue title="Gender" value={state.requisitionDetails.gender} />
+            <KeyValue 
+              title="Urgency" 
+              value={getLabel(urgencyOptions, state.requisitionDetails.urgency)}
+            />
+            <KeyValue 
+              title="Gender" 
+              value={getLabel(genderOptions, state.requisitionDetails.gender)}
+            />
           </DataCard>
           <DataCard title="Job Detail">
             <KeyValue title="Job Title" value={state.jobDetails.jobTitle} />
@@ -97,15 +115,15 @@ const PreviewCard: React.FC = () => {
           <DataCard title="Interview Settings">
             <KeyValue
               title="Interview Duration"
-              value={state.interviewSettings.interviewDuration}
+              value={getLabel(interviewDurationOptions, state.interviewSettings.interviewDuration)}
             />
             <KeyValue
               title="Interview Language"
-              value={state.interviewSettings.interviewLanguage}
+              value={getLabel(interviewLanguageOptions, state.interviewSettings.interviewLanguage)}
             />
             <KeyValue
               title="Interview Mode"
-              value={state.interviewSettings.interviewMode}
+              value={getLabel(interviewModeOptions, state.interviewSettings.interviewMode)}
             />
           </DataCard>
         </Box>
